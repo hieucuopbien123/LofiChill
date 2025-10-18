@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lofi chill</title>
+  <style>
+    @layer reset {
+      *:not(dialog, [popover]) {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      * {
+        padding: 0;
+      }
+      html {
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-touch-callout: none;
+        interpolate-size: allow-keywords;
+        overscroll-behavior: contain;
+        font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
+        font-weight: normal;
+        font-display: swap;
+        text-rendering: optimizeSpeed;
+        color-scheme: light dark;
+        tab-size: 2;
+        hanging-punctuation: first allow-end last;
+        word-break: break-word;
+        &:focus-within {
+          scroll-behavior: smooth;
+        }
+        -moz-text-size-adjust: none;
+        -webkit-text-size-adjust: none;
+        text-size-adjust: none;
+      }
+      :root {
+        --white: rgb(255,255,255);
+        --gray: #808080;
+        --black: rgb(0,0,0);
+
+        --text-color: rgba(255,255,255, 0.9);
+        --primary: #10b981;
+        --primary-40: rgba(16, 185, 129, 0.4); 
+        --secondary: #1f1e1ff1;
+        --secondary-100: #1f1e1f;
+
+        --font-tiny: clamp(0.75rem, calc(0.672rem + 0.25vw), 0.875rem); /* 12-14 500-1300 */
+        --font-small: clamp(0.875rem, calc(0.797rem + 0.25vw), 1rem); /* 14-16 500-1300 */
+        --font-medium: clamp(1rem, calc(0.922rem + 0.25vw), 1.125rem); /* 16-18 500-1300 */
+        --font-large: clamp(1.125rem, calc(1.047rem + 0.25vw), 1.25rem); /* 18-20 500-1300 */
+      }
+      body {
+        color: var(--text-color);
+        height: 100dvh;
+        font-size: var(--font-medium);
+        width: 100%;
+        /* overflow: hidden; */ /* Production only */
+        position: relative;
+        background-color: var(--black);
+      }
+      img, video {
+        max-width: 100%;
+        vertical-align: middle;
+        font-style: italic;
+        background-repeat: no-repeat; 
+        background-size: cover; 
+        shape-margin: 1rem;
+        user-select: none;
+        -webkit-user-drag: none;
+        vertical-align: bottom;
+      }
+      input + label {
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+      a {
+        text-decoration: none;
+      }
+      button{
+        text-transform: none;
+        cursor: pointer;
+        &:disabled {
+          cursor: not-allowed;
+        }
+      }
+      p {
+        cursor: text;
+      }
+      @view-transition {
+        navigation: auto;
+      }
+      h1,h2,h3,h4,h5,h6 { text-wrap: balance; }
+      p { text-wrap: pretty; }
+    }
+
+    @layer layout {
+      .page__loading, .page__error {
+        display: inline-block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: var(--font-large);
+      }
+      .page__main {
+        display: none;
+      }
+      .page__error {
+        display: none;
+      }
+    }
+
+    video {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      object-fit: cover;
+      position: absolute;
+    }
+    #audio__setting__dialog {
+      --_dialog_width: 23.125rem;
+      padding: 0.625rem;
+      padding-left: 0.5rem;
+      background-color: var(--secondary);
+      width: min(var(--_dialog_width), 85%);
+      min-width: 6.25rem;
+      border-radius: 0.625rem;
+      border: none;
+      @supports(anchor-name: --btn__audio) {
+        margin: 0px;
+        inset: unset;
+      }
+      position-anchor: --btn__audio;
+      bottom: calc(anchor(top) + 0.625rem);
+      left: anchor(left);
+      position-area: span-right top;
+      position-try-fallbacks: flip-inline, flip-block;
+    }
+    .audio__setting {
+      max-height: min(90dvh, 25rem);
+      overflow-y: auto;
+      scrollbar-width: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .audio__setting__music {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      color: white;
+      text-align: center;
+      margin: 0 5px;
+      label {
+        padding-block: 0.3rem;
+        cursor: pointer;
+        font-size: var(--font-small);
+        filter: drop-shadow(1px 1px 0 rgb(20, 20, 20));
+        background-color: #2e2b2ee0;
+        &:first-child {
+          border-top-left-radius: 0.3rem;
+          border-bottom-left-radius: 0.3rem;
+        }
+        &:last-child {
+          border-top-right-radius: 0.3rem;
+          border-bottom-right-radius: 0.3rem;
+        }
+      }
+    }
+    .audio__metadata {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-color);
+      font-size: var(--font-small);
+      :last-child {
+        max-width: 50%;
+      }
+    }
+    #musicTypeTrigger {
+      display: none;
+      &:not(:checked) + label, &:checked ~ label:last-child {
+        background-color: var(--black);
+        color: var(--primary);
+        pointer-events: none;
+      }
+    }
+    .audio__volume__container {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 1.25rem; 
+      row-gap: 0.625rem;
+      input[type="range"] {
+        flex-grow: 1;
+        background-color: transparent;
+        -webkit-appearance: none;
+        appearance: none;
+        position: relative;
+        z-index: 0;
+        &::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          left: 0;
+          right: 0;
+          height: 0.25rem;
+          background: radial-gradient(circle, var(--gray) 30%, transparent 31%);
+          background-size: 0.8125rem 0.25rem;
+          z-index: -1;
+        }
+        &::-webkit-slider-runnable-track {
+          background: linear-gradient(to right, var(--primary-40) 0%, var(--primary-40) var(--volume-percent), transparent var(--volume-percent), transparent 100%);
+          border-radius: 0.3125rem;
+          width: 100%;
+          height: 1.5rem;
+          cursor: pointer;
+        }
+        &::-webkit-slider-thumb {
+          margin-top: 0.25rem;
+          width: 1rem;
+          height: 1rem;
+          background: var(--primary);
+          border-radius: 50%;
+          border: 0.125rem solid var(--white);
+          cursor: pointer;
+          -webkit-appearance: none;
+          appearance: none;
+        }
+      }
+    }
+    .audio__volume {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+    .audio__volume__ranger {
+      display: none;
+      &:checked + label span {
+        background-color: var(--black);
+        border-radius: 0.3125rem;
+        color: oklch(from var(--white) l c h / 0.85);
+      }
+    }
+    .audio__volume__label {
+      color: var(--text-color);
+      font-size: var(--font-small);
+      display: grid;
+      span {
+        padding-block: 0.3125rem;
+        padding-inline: 0.5rem;
+        grid-area: stack;
+        width: fit-content;
+        &:first-child {
+          visibility: hidden;
+        }
+      }
+    }
+    .btn__container {
+      padding: 0.3125rem;
+      padding-inline: 0.625rem;
+      backdrop-filter: blur(10px);
+      position: absolute;
+      bottom: 0.625rem;
+      left: 0px;
+      right: 0px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .clock__container {
+      display: flex;
+      gap: 0.3125rem;
+      align-items: center;
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+    #clock {
+      font-weight: 500;
+      margin-right: 0.625rem;
+      white-space: nowrap;
+      font-size: var(--font-small);
+    }
+    .btn {
+      position: relative;
+      background-color: var(--black);
+      border: 1px solid var(--black);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      width: 2rem;
+      height: 2rem;
+      transition: all 100ms linear;
+      &:hover {
+        border: 1px solid oklch(from var(--white) l c h / 0.5);
+      }
+      svg {
+        fill: var(--text-color);
+      }
+    }
+    .btn__play, .btn__fullscreen {
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+      svg:nth-child(2) {
+        display: none;
+      }
+    }
+    .btn__audio {
+      anchor-name: --btn__audio;
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+    .btn__bg {
+      anchor-name: --btn__bg;
+      svg {
+        width: 0.875rem;
+        height: 0.875rem;
+      }
+    }
+    #bg__selection {
+      padding: 0.625rem;
+      border-radius: 0.625rem;
+      border: none;
+      width: min(25rem, 90%);
+      color: var(--text-color);
+      background-color: oklch(from var(--black) l c h / 0.9);
+      @supports(anchor-name: --btn__bg) {
+        margin: 0px; /* required for position-area */
+        inset: unset;
+      }
+      position-anchor: --btn__bg;
+      bottom: calc(anchor(top) + 0.625rem);
+      left: anchor(left);
+      position-area: span-right top;
+      position-try-fallbacks: flip-inline, flip-block;
+    }
+    .bg__selection__container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      input {
+        cursor: pointer;
+      }
+    }
+    .bg__selection__list {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 0.625rem;
+      max-height: min(90dvh, 31.25rem);
+      overflow-y: auto;
+      scrollbar-width: none;
+      width: 100%;
+    }
+    .bg__selection__item {
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      -webkit-user-drag: none;
+      &::before {
+        content: attr(data-name);
+        top: 0.25rem;
+        left: 0.25rem;
+        padding: 3px;
+        background-color: oklch(from var(--white) l c h / 0.75);
+        font-size: 0.75rem;
+        position: absolute;
+        font-weight: 500;
+        color: oklch(from var(--black) l c h / 0.9);
+        border-radius: 4px;
+      }
+      img {
+        object-fit: cover;
+        aspect-ratio: 2 / 1;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <dialog id="bg__selection" popover>
+    <div class="bg__selection__container">
+      <div>
+        <input type="checkbox" checked id="autobgTrigger"></input><!-- prevent small space between
+    ---><label for="autobgTrigger">&nbsp;Auto change background</label>
+      </div>
+      <div class="bg__selection__list"></div>
+    </div>
+  </dialog>
+  <dialog id="audio__setting__dialog" popover>
+    <div class="audio__setting">
+      <div class="audio__setting__music">
+        <input type="checkbox" id="musicTypeTrigger"></input>
+        <label for="musicTypeTrigger">Lofi</label>
+        <label for="musicTypeTrigger">Chillstep</label>
+      </div>
+      <div class="audio__metadata">
+        <div>00:00 / 00:00</div>
+        <div>.</div>
+        <div>Anesthesia.mp3</div>
+      </div>
+      <div class="audio__volume__container">
+        <!-- <div class="audio__volume">
+          <input type="checkbox" id="musicTrigger" class="audio__volume__ranger"></input>
+          <label for="musicTrigger" class="audio__volume__label">
+            <span>Loading...</span>
+            <span>Music</span>
+          </label>
+        </div>
+        <input type="range" min="0" max="100" value="50" id="musicVol" style="--volume-percent: 50%;"> -->
+      </div>
+    </div>
+  </dialog>
+
+  <div class="page__loading">
+    Loading . . .
+  </div>
+  <div class="page__error">
+    Page error
+  </div>
+  <div class="page__main">
+    <video src="./assets/videos/Green House.mp4" loop autoplay muted playsinline id="mainBg" preload="auto"></video>
+    <audio src="./assets/audio/lofi/Taikutsu - Deadth Note.mp3" id="bgAudio" preload="auto"></audio>
+    <div class="btn__container">
+      <div>
+        <button class="btn btn__play" title="Play music (Ctrl/Cmd + M)">
+          <svg viewBox="0 0 24 24" aria-hidden="true" data-slot="icon"><path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd"></path></svg>
+          <svg viewBox="0 0 24 24" data-slot="icon"><path fill-rule="evenodd" d="M5.25 4.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v15a.75.75 0 0 1-.75.75h-3 a.75.75 0 0 1-.75-.75v-15Zm9 0a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v15a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75v-15Z" clip-rule="evenodd"/>
+        </svg>
+        </button>
+        <button class="btn btn__audio" popovertarget="audio__setting__dialog" title="Audio settings">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4 text-neutral-100"><path d="M6 12a.75.75 0 0 1-.75-.75v-7.5a.75.75 0 1 1 1.5 0v7.5A.75.75 0 0 1 6 12ZM18 12a.75.75 0 0 1-.75-.75v-7.5a.75.75 0 0 1 1.5 0v7.5A.75.75 0 0 1 18 12ZM6.75 20.25v-1.5a.75.75 0 0 0-1.5 0v1.5a.75.75 0 0 0 1.5 0ZM18.75 18.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 1.5 0ZM12.75 5.25v-1.5a.75.75 0 0 0-1.5 0v1.5a.75.75 0 0 0 1.5 0ZM12 21a.75.75 0 0 1-.75-.75v-7.5a.75.75 0 0 1 1.5 0v7.5A.75.75 0 0 1 12 21ZM3.75 15a2.25 2.25 0 1 0 4.5 0 2.25 2.25 0 0 0-4.5 0ZM12 11.25a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5ZM15.75 15a2.25 2.25 0 1 0 4.5 0 2.25 2.25 0 0 0-4.5 0Z"></path></svg>
+        </button>
+        <button class="btn btn__bg" popovertarget="bg__selection" title="Background settings">
+          <svg stroke-width="0" viewBox="0 0 512 512"><path d="M450.29 112H142c-34 0-62 27.51-62 61.33v245.34c0 33.82 28 61.33 62 61.33h308c34 0 62-26.18 62-60V173.33c0-33.82-27.68-61.33-61.71-61.33zm-77.15 61.34a46 46 0 1 1-46.28 46 46.19 46.19 0 0 1 46.28-46.01zm-231.55 276c-17 0-29.86-13.75-29.86-30.66v-64.83l90.46-80.79a46.54 46.54 0 0 1 63.44 1.83L328.27 337l-113 112.33zM480 418.67a30.67 30.67 0 0 1-30.71 30.66H259L376.08 333a46.24 46.24 0 0 1 59.44-.16L480 370.59z"></path><path d="M384 32H64A64 64 0 0 0 0 96v256a64.11 64.11 0 0 0 48 62V152a72 72 0 0 1 72-72h326a64.11 64.11 0 0 0-62-48z"></path></svg>
+        </button>
+        <button class="btn btn__fullscreen" title="Full screen (Ctr/Cmd + Shift + F)">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4 text-neutral-100"><path fill-rule="evenodd" d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-3.97 3.97a.75.75 0 1 1-1.06-1.06l3.97-3.97h-2.69a.75.75 0 0 1-.75-.75Zm-12 0A.75.75 0 0 1 3.75 3h4.5a.75.75 0 0 1 0 1.5H5.56l3.97 3.97a.75.75 0 0 1-1.06 1.06L4.5 5.56v2.69a.75.75 0 0 1-1.5 0v-4.5Zm11.47 11.78a.75.75 0 1 1 1.06-1.06l3.97 3.97v-2.69a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1 0-1.5h2.69l-3.97-3.97Zm-4.94-1.06a.75.75 0 0 1 0 1.06L5.56 19.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4 text-neutral-100"><path fill-rule="evenodd" d="M3.22 3.22a.75.75 0 0 1 1.06 0l3.97 3.97V4.5a.75.75 0 0 1 1.5 0V9a.75.75 0 0 1-.75.75H4.5a.75.75 0 0 1 0-1.5h2.69L3.22 4.28a.75.75 0 0 1 0-1.06Zm17.56 0a.75.75 0 0 1 0 1.06l-3.97 3.97h2.69a.75.75 0 0 1 0 1.5H15a.75.75 0 0 1-.75-.75V4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0ZM3.75 15a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-2.69l-3.97 3.97a.75.75 0 0 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1-.75-.75Zm10.5 0a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-2.69l3.97 3.97a.75.75 0 1 1-1.06 1.06l-3.97-3.97v2.69a.75.75 0 0 1-1.5 0V15Z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="clock__container">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4 text-neutral-100 md:ml-2"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd"></path></svg>
+        <div id="clock">fasdfs</div>
+    </div>
+  </div>
+
+  <script>
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    let nextAudio = new Audio();
+    let backgroundName = [
+      "Afternoon Snooze",
+      "Autumn Garden",
+      "Butterfly",
+      "Campfire",
+      "Cozy Autumn",
+      "Cozy House",
+      "Dream House",
+      "Dream Sunset",
+      "Empty Classroom",
+      "Flowery Shore",
+      "Forest Sunset",
+      "Granpas Cottage",
+      "Green House",
+      "Haunted Forest",
+      "Lofi Cat",
+      "Lofi Girl",
+      "Matrix",
+      "Miami Vibes",
+      "Rainy Room",
+      "Sakura",
+      "Sand",
+      "Snow House",
+      "Sunset Study",
+      "Tropical Beach",
+      "Warm Brew Kitchen",
+      "Zen Retreat",
+    ];
+    backgroundName = shuffle(backgroundName);
+    let listLofi = [
+      "Afternoon snooze",
+      "All of me - Street Vital",
+      "As a matter of fact",
+      "Cloudburst - Lomtre",
+      "Crayon Dreams",
+      "Distorted memories - øneheart & reidenshi",
+      "Dream Playground",
+      "Dystopia - thenian",
+      "Forgotten - Lomtre",
+      "Ghost lullaby",
+      "Homesick - Lomtre",
+      "Hope to see you again",
+      "I was only temporary",
+      "Last Lights - Lomtre",
+      "Memories - leadwave",
+      "Memory Reboot",
+      "Metanoia - Lomtre",
+      "Nobody's here",
+      "Pulse - antent",
+      "Rain inside",
+      "Sine - Lomtre",
+      "Snowfall - øneheart & reidenshi",
+      "Soulglance - a vow",
+      "Taikutsu - Deadth Note",
+      "This world is sick - antent",
+      "Unwind - Lomtre",
+      "You look lonely, I can fix that - dreamscape",
+    ];
+    listLofi = shuffle(listLofi);
+    let listChillstep = [
+      "Anesthesia - Vexento Dexento",
+      "Angel - Sacred",
+      "Beanie",
+      "Beautiful Sunset - CMA",
+      "Believe in yourself",
+      "Bensound",
+      "Caught In Our Thoughts - CMA",
+      "Chillstep - Blackmill",
+      "Don't Look Back - CMA",
+      "Ethereal - CMA",
+      "Fogive me - CMA",
+      "Forever In My Heart - CMA",
+      "Fragments of the past- CMA",
+      "I C U",
+      "Kira's Theme A - Death Note",
+      "Life Goes On - CMA",
+      "Light's Theme A - Death Note",
+      "Light's Theme B - Death Note",
+      "Looking Back - Vexento",
+      "Lost Dreams - CMA & nExow",
+      "New Land",
+      "Night Vision",
+      "Retreat",
+      "Sappheiros",
+      "Small Losses - CMA",
+      "Spirit of Life - Blackmill",
+      "Thank You - Dido",
+      "Tokusou Kirahan - Death Note",
+      "Transgender - Crystal Castles",
+      "Without You - CMA",
+      "You're Alive - CMA",
+      "You're Free - CMA",
+      "You're Not Alone - CMA",
+      "Your love is my drug",
+    ];
+    listChillstep = shuffle(listChillstep);
+    const noiseControls = {
+      ["music"]: { label: "Music", defaultVolume: 50 },
+      ["rain"]: { label: "Rain", defaultVolume: 35 },
+      ["blizzard"]: { label: "Blizzard", defaultVolume: 35 },
+      ["thunderstorm"]: { label: "Thunderstorm", defaultVolume: 40 },
+      ["underwater"]: { label: "Underwater", defaultVolume: 50 },
+      ["clock"]: { label: "Clock", defaultVolume: 50 },
+      ["whitenoise"]: { label: "White noise", defaultVolume: 35 },
+      ["pinknoise"]: { label: "Pink noise", defaultVolume: 30 },
+      ["brownnoise"]: { label: "Brown noise", defaultVolume: 35 },
+      ["bird"]: { label: "Bird", defaultVolume: 40 },
+      ["bird2"]: { label: "Bird 2", defaultVolume: 40 },
+      ["airport"]: { label: "Airport", defaultVolume: 40 },
+      ["cafe"]: { label: "Cafe", defaultVolume: 40 },
+      ["campfire"]: { label: "Campfire", defaultVolume: 40 },
+      ["office"]: { label: "Office", defaultVolume: 40 }
+    };
+
+    let currentBg = localStorage.getItem("currentBg");
+    if(!currentBg) {
+      currentBg = backgroundName[backgroundName.length - 1];
+      localStorage.setItem("currentBg", currentBg);
+    }
+    let autoChangeBackground = localStorage.getItem("autoChangeBackground");
+    autoChangeBackground = autoChangeBackground !== null ? JSON.parse(autoChangeBackground) : false;
+    if(!autoChangeBackground) {
+      autoChangeBackground = true;
+      localStorage.setItem("autoChangeBackground", autoChangeBackground);
+    }
+    let currentMusicType = localStorage.getItem("currentMusicType");
+    if(!currentMusicType) {
+      currentMusicType = "lofi";
+      localStorage.setItem("currentMusicType", currentMusicType);
+    }
+    let currentSongIndex = 0;
+    if(currentMusicType === "chillstep") {
+      currentSong = listChillstep[0];
+    } else {
+      currentSong = listLofi[0];
+    }
+    let noiseVolumes = localStorage.getItem("noiseVolumes");
+    if(!noiseVolumes) {
+      noiseVolumes = {
+        ["music"]: "50",
+        ["rain"]: "35",
+        ["blizzard"]: "40",
+        ["thunderstorm"]: "40",
+        ["underwater"]: "50",
+        ["clock"]: "50",
+        ["whitenoise"]: "35",
+        ["pinknoise"]: "30",
+        ["brownnoise"]: "35",
+        ["bird"]: "40",
+        ["bird2"]: "40",
+        ["airport"]: "40",
+        ["cafe"]: "40",
+        ["campfire"]: "40",
+        ["office"]: "40",
+      };
+      localStorage.setItem("noiseVolumes", JSON.stringify(noiseVolumes));
+    }
+    else {
+      noiseVolumes = JSON.parse(noiseVolumes);
+    }
+  </script>
+
+  <script>
+    mainBg.src = `./assets/videos/${currentBg}.mp4`;
+    window.onload = () => {
+      const pageMain = document.querySelector(".page__main");
+      const pageLoading = document.querySelector(".page__loading");
+      const pageError = document.querySelector(".page__error");
+      if (mainBg.readyState >= 4) { // 4 = HAVE_ENOUGH_DATA
+        pageLoading.style.display = "none";
+        pageError.style.display = "none";
+        pageMain.style.display = "block";
+      } else {
+        mainBg.addEventListener('canplaythrough', () => {
+          pageLoading.style.display = "none";
+          pageError.style.display = "none";
+          pageMain.style.display = "block";
+        });
+      }
+      mainBg.addEventListener('error', () => {
+        pageMain.style.display = "none";
+        pageLoading.style.display = "none";
+        pageError.style.display = "block";
+      });
+    };
+  </script>
+
+  <script>
+    let preloadSongs = new Set();
+    function preloadNext() {
+      let audioList = currentMusicType === "lofi" ? listLofi : listChillstep;
+      let nextSongIndex = (currentSongIndex + 1) % audioList.length;
+      let nextSong = audioList[nextSongIndex];
+      if(!preloadSongs.has(nextSong)) {
+        nextAudio.src = `./assets/audio/${currentMusicType}/${nextSong}.mp3`;
+        nextAudio.load();
+        preloadSongs.add(nextSong);
+      }
+    }
+    bgAudio.src = `./assets/audio/${currentMusicType}/${currentSong}.mp3`;
+    let songTime = document.querySelector(".audio__metadata :first-child");
+    let songName = document.querySelector(".audio__metadata :last-child");
+    songName.textContent = currentSong;
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    let songDurationText = "00:00";
+    let songCurrentTimeText = "00:00";
+    songTime.textContent = "00:00 / 00:00";
+    bgAudio.addEventListener("loadedmetadata", () => {
+      songDurationText = formatTime(bgAudio.duration);
+      songTime.textContent = `${songCurrentTimeText} / ${songDurationText}`;
+    });
+    bgAudio.addEventListener("timeupdate", () => {
+      songCurrentTimeText = formatTime(bgAudio.currentTime);
+      songTime.textContent = `${songCurrentTimeText} / ${songDurationText}`;
+      if (bgAudio.duration && bgAudio.currentTime > bgAudio.duration - 10) {
+        preloadNext();
+      }
+    });
+  </script>
+
+  <script>
+    for (const [key, control] of Object.entries(noiseControls)) {
+      control.defaultVolume = noiseVolumes[key] ?? control.defaultVolume;
+    }
+    const audioVolContainer = document.querySelector('.audio__volume__container');
+    for (const [key, control] of Object.entries(noiseControls)) {
+      const volumeDiv = document.createElement('div');
+      volumeDiv.className = 'audio__volume';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `${key}Trigger`;
+      checkbox.className = 'audio__volume__ranger';
+      const label = document.createElement('label');
+      label.setAttribute('for', `${key}Trigger`);
+      label.className = 'audio__volume__label';
+      const loadingSpan = document.createElement('span');
+      loadingSpan.textContent = 'Loading...';
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = control.label;
+      label.appendChild(loadingSpan);
+      label.appendChild(nameSpan);
+      volumeDiv.appendChild(checkbox);
+      volumeDiv.appendChild(label);
+      const rangeInput = document.createElement('input');
+      rangeInput.type = 'range';
+      rangeInput.min = '0';
+      rangeInput.max = '100';
+      rangeInput.value = control.defaultVolume.toString();
+      rangeInput.id = `${key}Vol`;
+      rangeInput.style.setProperty('--volume-percent', `${control.defaultVolume}%`);
+      audioVolContainer.appendChild(volumeDiv);
+      audioVolContainer.appendChild(rangeInput);
+    }
+
+    var musicName = document.querySelector(".audio__volume__label[for='musicTrigger'] span:last-child");
+    bgAudio.addEventListener("waiting", () => {
+      musicName.textContent = "Loading...";
+    });
+    bgAudio.addEventListener("canplay", () => {
+      musicName.textContent = "Music";
+      musicName.style.color = "var(--text-color)";
+    });
+    bgAudio.addEventListener("error", () => {
+      musicName.textContent = "Error...";
+      musicName.style.color = "red";
+    });
+  </script>
+
+  <script>
+    if(currentMusicType == "chillstep") {
+      musicTypeTrigger.checked = true;
+    } else {
+      musicTypeTrigger.checked = false;
+    }
+    musicTypeTrigger.addEventListener("change", () => {
+      if(musicTypeTrigger.checked && currentMusicType !== "chillstep") {
+        currentMusicType = "chillstep";
+        console.log(listChillstep);
+        listChillstep = shuffle(listChillstep);
+        console.log(listChillstep);
+        currentSong = listChillstep[0];
+      } else if(!musicTypeTrigger.checked && currentMusicType !== "lofi") {
+        currentMusicType = "lofi";
+        listLofi = shuffle(listLofi);
+        currentSong = listLofi[0];
+      }
+      currentSongIndex = 0;
+      localStorage.setItem("currentMusicType", currentMusicType);
+      songName.textContent = currentSong;
+      songTime.textContent = "00:00 / 00:00";
+      bgAudio.src = `./assets/audio/${currentMusicType}/${currentSong}.mp3`;
+      if(musicTrigger.checked) bgAudio.play();
+    });
+  </script>
+
+  <script>
+    let togglePlayButton = document.querySelector(".btn__play");
+    let playIcon = togglePlayButton.querySelector("svg:first-child");
+    let pauseIcon = togglePlayButton.querySelector("svg:last-child");
+    function triggerPlayMusic() {
+      if(musicTrigger.checked) {
+        bgAudio.play();
+        playIcon.style.display = "none";
+        pauseIcon.style.display = "inline";
+      } else {
+        bgAudio.pause();
+        playIcon.style.display = "inline";
+        pauseIcon.style.display = "none";
+      }
+    }
+    function setVolume(volume) {
+      noiseVolumes.music = volume;
+      localStorage.setItem("noiseVolumes", JSON.stringify(noiseVolumes));
+      volume = Math.max(0, Math.min(1, volume / 100));
+      bgAudio.volume = volume;
+      if (bgAudio.paused) {
+        musicTrigger.checked = true;
+        triggerPlayMusic();
+      }
+    }
+    bgAudio.volume = musicVol.value / 100;
+    togglePlayButton.addEventListener("click", () => {
+      musicTrigger.checked = bgAudio.paused;
+      triggerPlayMusic();
+    });
+    musicTrigger.addEventListener("change", () => {
+      triggerPlayMusic();
+    });
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    bgAudio.addEventListener("ended", async () => {
+      let audioList = currentMusicType === "lofi" ? listLofi : listChillstep;
+      currentSongIndex = (currentSongIndex + 1) % audioList.length;
+      currentSong = audioList[currentSongIndex];
+      songName.textContent = currentSong;
+      songTime.textContent = "00:00 / 00:00";
+      bgAudio.src = `./assets/audio/${currentMusicType}/${currentSong}.mp3`;
+      await sleep(1000);
+      if(musicTrigger.checked) bgAudio.play();
+    });
+    musicVol.addEventListener('input', (e) => {
+      setVolume(e.target.value);
+      musicVol.style.setProperty('--volume-percent', e.target.value + '%');
+    });
+  </script>
+
+  <script>
+    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    var rainLabel = audioVolContainer.querySelector("label[for='rainTrigger']");
+    var blizzardLabel = audioVolContainer.querySelector("label[for='blizzardTrigger']");
+    var thunderstormLabel = audioVolContainer.querySelector("label[for='thunderstormTrigger']");
+    var clockLabel = audioVolContainer.querySelector("label[for='clockTrigger']");
+    var underwaterLabel = audioVolContainer.querySelector("label[for='underwaterTrigger']");
+    var whitenoiseLabel = audioVolContainer.querySelector("label[for='whitenoiseTrigger']");
+    var pinknoiseLabel = audioVolContainer.querySelector("label[for='pinknoiseTrigger']");
+    var brownnoiseLabel = audioVolContainer.querySelector("label[for='brownnoiseTrigger']");
+    var birdLabel = audioVolContainer.querySelector("label[for='birdTrigger']");
+    var bird2Label = audioVolContainer.querySelector("label[for='bird2Trigger']");
+    var clockLabel = audioVolContainer.querySelector("label[for='clockTrigger']");
+    var airportLabel = audioVolContainer.querySelector("label[for='airportTrigger']");
+    var cafeLabel = audioVolContainer.querySelector("label[for='cafeTrigger']");
+    var campfireLabel = audioVolContainer.querySelector("label[for='campfireTrigger']");
+    var officeLabel = audioVolContainer.querySelector("label[for='officeTrigger']");
+    var labelList = [
+      rainLabel, blizzardLabel, thunderstormLabel, clockLabel, underwaterLabel, whitenoiseLabel,
+      pinknoiseLabel, brownnoiseLabel, birdLabel, bird2Label, clockLabel, airportLabel, 
+      cafeLabel, campfireLabel, officeLabel
+    ];
+    var triggerList = [
+      rainTrigger, blizzardTrigger, thunderstormTrigger, clockTrigger, underwaterTrigger, whitenoiseTrigger,
+      pinknoiseTrigger, brownnoiseTrigger, birdTrigger, bird2Trigger, clockTrigger, airportTrigger,
+      cafeTrigger, campfireTrigger, officeTrigger
+    ];
+    var urlNoiseList = [
+      "./assets/noise/rain.mp3",
+      "./assets/noise/blizzard.mp3",
+      "./assets/noise/thunderstorm.mp3",
+      "./assets/noise/antique_clock.mp3",
+      "./assets/noise/underwater.mp3",
+      "./assets/noise/white_noise.mp3",
+      "./assets/noise/pink_noise.mp3",
+      "./assets/noise/brown_noise.mp3",
+      "./assets/noise/birds1.mp3",
+      "./assets/noise/birds2.mp3",
+      "./assets/noise/antique_clock.mp3",
+      "./assets/noise/airport.mp3",
+      "./assets/noise/cafe.mp3",
+      "./assets/noise/campfire.mp3",
+      "./assets/noise/office.mp3",
+    ];
+    var volTagList = [
+      rainVol, blizzardVol, thunderstormVol, clockVol, underwaterVol, whitenoiseVol,
+      pinknoiseVol, brownnoiseVol, birdVol, bird2Vol, clockVol, airportVol,
+      cafeVol, campfireVol, officeVol
+    ];
+    var volKeyStorage = [
+      "rain", "blizzard", "thunderstorm", "clock", "underwater", "whitenoise",
+      "pinknoise", "brownnoise", "bird", "bird2", "clock", "airport",
+      "cafe", "campfire", "office"
+    ];
+
+    let audioBuffer = { };
+    let gainBuffer = { };
+    let audioSource = { };
+    let loadState = { };
+    async function loadAudio(url, labelTag) {
+      if(!audioBuffer[url] && !loadState[url]) {
+        loadState[url] = true;
+        var loadingText = labelTag.querySelector("span:first-child");
+        var originalText = labelTag.querySelector("span:last-child");
+        originalText.style.visibility = "hidden";
+        loadingText.style.visibility = "visible";
+        try{
+          const rawData = await fetch(url);
+          const arrayBuffer = await rawData.arrayBuffer();
+          audioBuffer[url] = await audioContext.decodeAudioData(arrayBuffer);
+        } catch(e) {
+          console.error("Error loading audio:", url, ", ex::", e);
+        }
+        finally {
+          loadingText.style.visibility = "hidden";
+          originalText.style.visibility = "visible";
+          loadState[url] = false;
+        }
+      }
+    }
+    async function playAudio (url, volume) {
+      if(audioBuffer[url] && !audioSource[url]){
+        audioSource[url] = audioContext.createBufferSource();
+        gainBuffer[url] = audioContext.createGain();
+        gainBuffer[url].connect(audioContext.destination);
+        gainBuffer[url].gain.value = Math.max(0, Math.min(1, volume));
+        audioSource[url].buffer = audioBuffer[url];
+        audioSource[url].loop = true;
+        audioSource[url].connect(gainBuffer[url]);
+        audioSource[url].start(0);
+      }
+    }
+    async function stopAudio(url) {
+      try { audioSource[url].stop(); } catch (e) {}
+      audioSource[url].disconnect();
+      audioSource[url] = null;
+    }
+  </script>
+
+  <script>
+    for(let i = 0; i < urlNoiseList.length; i++) {
+      let url = urlNoiseList[i];
+      let labelTag = labelList[i];
+      let triggerTag = triggerList[i];
+      let volTag = volTagList[i];
+      triggerTag.addEventListener("click", async () => {
+        await loadAudio(url, labelTag);
+        if (triggerTag.checked) playAudio(url, volTag.value/100);
+        else if (audioSource[url] != null) stopAudio(url);
+      });
+      volTag.addEventListener('input', async (e) => {
+        triggerTag.checked = true;
+        volTag.style.setProperty('--volume-percent', volTag.value + '%');
+        noiseVolumes[volKeyStorage[i]] = e.target.value;
+        localStorage.setItem("noiseVolumes", JSON.stringify(noiseVolumes));
+        await loadAudio(url, labelTag);
+        if (triggerTag.checked) playAudio(url, e.target.value/100);
+        if (gainBuffer[url]) gainBuffer[url].gain.value = Math.max(0, Math.min(1, e.target.value/100));
+      });
+    }
+  </script>
+
+  <script>
+    const bgContainer = document.querySelector(".bg__selection__list");
+    for (const bgName of backgroundName) {
+      const imgWrapper = document.createElement("div");
+      imgWrapper.className = "bg__selection__item";
+      const img = document.createElement("img");
+      img.src = `./assets/background/${bgName}.png`;
+      img.loading = "lazy";
+      imgWrapper.dataset.name = bgName;
+      imgWrapper.appendChild(img);
+      bgContainer.appendChild(imgWrapper);
+    }
+
+    let currentBgIndex = backgroundName.indexOf(currentBg);
+    var imgList = bgContainer.querySelectorAll("& > .bg__selection__item");
+    function changeVideo() {
+      currentBgIndex = (currentBgIndex + 1) % backgroundName.length;
+      mainBg.src = `./assets/videos/${backgroundName[currentBgIndex]}.mp4`;
+      localStorage.setItem("currentBg", backgroundName[currentBgIndex]);
+    }
+    let autoBgIntervalId = null;
+    function autoplayBgVideo () {
+      if(autoBgIntervalId != null) clearInterval(autoBgIntervalId);
+      autoBgIntervalId = setInterval(changeVideo, 1000*60*5);
+    }
+    if(autoChangeBackground == "true") {
+      autoplayBgVideo();
+      autobgTrigger.checked = true;
+    } else {
+      autobgTrigger.checked = false;
+    }
+    imgList.forEach(img => img.addEventListener("click", (e) => {
+      currentBgIndex = backgroundName.indexOf(e.currentTarget.dataset.name);
+      mainBg.src = `./assets/videos/${e.currentTarget.dataset.name}.mp4`;
+      localStorage.setItem("currentBg", e.currentTarget.dataset.name);
+      if(autobgTrigger.checked) autoplayBgVideo();
+    }));
+    autobgTrigger.addEventListener("change", (e) => {
+      if(e.target.checked) localStorage.setItem("autoChangeBackground", true);
+      else localStorage.setItem("autoChangeBackground", false);
+      if(e.target.checked && autoBgIntervalId == null) autoplayBgVideo();
+      else if(!e.target.checked && autoBgIntervalId != null) {
+        clearInterval(autoBgIntervalId);
+        autoBgIntervalId = null;
+      }
+    });
+    const preloadedVideos = new Set();
+    let nextVideo = document.createElement("video");
+    nextVideo.preload = "auto";
+    nextVideo.muted = true;
+    function preloadNextVideo() {
+      const nextBgIndex = (currentBgIndex + 1) % backgroundName.length;
+      const nextBgLoad = backgroundName[nextBgIndex];
+      if (!preloadedVideos.has(nextBgLoad)) {
+        nextVideo.src = `./assets/videos/${nextBgLoad}.mp4`;
+        nextVideo.load();
+        preloadedVideos.add(nextBgLoad);
+      }
+    }
+    let timer;
+    mainBg.addEventListener("play", () => {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        if (mainBg.duration && mainBg.currentTime > mainBg.duration - 1.5) {
+          preloadNextVideo();
+        }
+      }, 1000);
+    });
+  </script>
+
+  <script>
+    let toggleFullScreenButton = document.querySelector(".btn__fullscreen");
+    let expandIcon = toggleFullScreenButton.querySelector("svg:first-child");
+    let shrinkIcon = toggleFullScreenButton.querySelector("svg:last-child");
+    const triggerFullScreen = async () => {
+      if (expandIcon.style.display == "none" && document.fullscreenElement) {
+        expandIcon.style.display = "inline";
+        shrinkIcon.style.display = "none";
+        await document.exitFullscreen?.();
+      } else if (!document.fullscreenElement){
+        expandIcon.style.display = "none";
+        shrinkIcon.style.display = "inline";
+        await document.documentElement.requestFullscreen?.();
+      }
+    };
+    toggleFullScreenButton.addEventListener("click", () => {
+      triggerFullScreen();
+    });
+    document.addEventListener("keydown", async (event) => {
+      const isMac = navigator.platform.toUpperCase().includes("MAC");
+      const modKey = isMac ? event.metaKey : event.ctrlKey;
+      const key = event.key.toLowerCase();
+      if (!modKey) return;
+      if (key === "m") {
+        event.preventDefault();
+        musicTrigger.checked = bgAudio.paused;
+        triggerPlayMusic();
+      }
+      if (event.shiftKey && key === "f") {
+        event.preventDefault();
+        triggerFullScreen();
+      }
+    });
+  </script>
+
+  <script>
+    const audio = document.getElementById("myAudio");
+    const statusText = document.getElementById("status");
+    const clock = document.getElementById("clock");
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      clock.textContent = `${h}:${m}`;
+      const msUntilNextMinute = (60 - now.getSeconds()) * 1000;
+      setTimeout(updateClock, msUntilNextMinute + 50);
+    }
+    updateClock();
+  </script>
+</body>
+</html>
