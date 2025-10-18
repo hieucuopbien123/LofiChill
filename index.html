@@ -7,7 +7,6 @@
   <meta name="description" content="Lofi chill music background">
   <meta name="keywords" content="Lofi girl, lofi chill, lofizen, music, animated background, clock"/>
   <link rel = "canonical" href = "https://hieucuopbien123.github.io/LofiChill/"/>
-  <link rel="preload" as="image" href="./assets/logo.svg"/>
   <link rel="icon" href="./assets/logo.svg"/>
   <meta property = "og:type" content = "website" />
   <meta property = "og:title" content = "Lofi chill" />
@@ -387,6 +386,7 @@
       padding: 0.625rem;
       border-radius: 0.625rem;
       border: none;
+      width: min(25rem, 81dvw);
       max-width: 25rem;
       color: var(--text-color);
       background-color: oklch(from var(--black) l c h / 0.9);
@@ -531,6 +531,7 @@
       }
       return array;
     }
+    var preloadedBgSet = new Set();
     let nextAudio = new Audio();
     let backgroundName = [
       "Afternoon Snooze",
@@ -647,6 +648,7 @@
     };
 
     let currentBg = localStorage.getItem("currentBg");
+    let currentBgIndex = backgroundName.indexOf(currentBg);
     if(!currentBg) {
       currentBg = backgroundName[backgroundName.length - 1];
       localStorage.setItem("currentBg", currentBg);
@@ -714,18 +716,22 @@
           pageLoading.style.display = "none";
           pageError.style.display = "none";
           pageMain.style.display = "block";
-        });  
-        // video.addEventListener('loadstart', () => {
-        //   loading.style.display = 'inline-block';
-        // });
-        // video.addEventListener("loadeddata", () => {
-        //   videoLoading.style.display = "none";
-        // });
+          preloadedBgSet.add(backgroundName[currentBgIndex]);
+        });
       }
       mainBg.addEventListener("error", () => {
         pageMain.style.display = "none";
         pageLoading.style.display = "none";
         pageError.style.display = "block";
+      });
+      mainBg.addEventListener("loadstart", () => {
+        console.log(preloadedBgSet);
+        if(preloadedBgSet.has(backgroundName[currentBgIndex])) return;
+        videoLoading.style.display = "inline-block";
+      });
+      mainBg.addEventListener("loadeddata", () => {
+        videoLoading.style.display = "none";
+        preloadedBgSet.add(backgroundName[currentBgIndex]);
       });
     };
   </script>
@@ -1065,6 +1071,7 @@
       const imgWrapper = document.createElement("div");
       imgWrapper.className = "bg__selection__item";
       const img = document.createElement("img");
+      img.setAttribute("fetchpriority", "low");
       img.src = `./assets/background/${bgName}.png`;
       img.alt = bgName;
       img.loading = "lazy";
@@ -1073,7 +1080,6 @@
       bgContainer.appendChild(imgWrapper);
     }
 
-    let currentBgIndex = backgroundName.indexOf(currentBg);
     var imgList = bgContainer.querySelectorAll("& > .bg__selection__item");
     function changeVideo() {
       currentBgIndex = (currentBgIndex + 1) % backgroundName.length;
@@ -1112,17 +1118,16 @@
         autoBgIntervalId = null;
       }
     });
-    const preloadedVideos = new Set();
     let nextVideo = document.createElement("video");
     nextVideo.preload = "auto";
     nextVideo.muted = true;
     function preloadNextVideo() {
       const nextBgIndex = (currentBgIndex + 1) % backgroundName.length;
       const nextBgLoad = backgroundName[nextBgIndex];
-      if (!preloadedVideos.has(nextBgLoad)) {
+      if (!preloadedBgSet.has(nextBgLoad)) {
         nextVideo.src = `./assets/videos/${nextBgLoad}.mp4`;
         nextVideo.load();
-        preloadedVideos.add(nextBgLoad);
+        preloadedBgSet.add(nextBgLoad);
       }
     }
     let timer;
