@@ -746,7 +746,6 @@
         pageError.style.display = "block";
       });
       mainBg.addEventListener("loadstart", () => {
-        if(preloadedBgSet.has(backgroundName[currentBgIndex])) return;
         videoLoading.style.display = "inline-block";
       });
       mainBg.addEventListener("loadeddata", () => {
