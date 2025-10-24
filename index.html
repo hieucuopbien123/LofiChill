@@ -33,7 +33,7 @@
         -webkit-touch-callout: none;
         interpolate-size: allow-keywords;
         overscroll-behavior: contain;
-        font-family: Avenir, Montserrat, Corbel, "URW Gothic", source-sans-pro, sans-serif;
+        font-family: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand, Comfortaa, Manjari, 'Arial Rounded MT', 'Arial Rounded MT Bold', Calibri, source-sans-pro, sans-serif;
         font-weight: normal;
         font-display: swap;
         text-rendering: optimizeSpeed;
@@ -59,10 +59,10 @@
         --secondary: #1f1e1ff1;
         --secondary-100: #1f1e1f;
 
-        --font-tiny: clamp(0.75rem, calc(0.672rem + 0.25vw), 0.875rem); /* 12-14 500-1300 */
-        --font-small: clamp(0.875rem, calc(0.797rem + 0.25vw), 1rem); /* 14-16 500-1300 */
-        --font-medium: clamp(1rem, calc(0.922rem + 0.25vw), 1.125rem); /* 16-18 500-1300 */
-        --font-large: clamp(1.125rem, calc(1.047rem + 0.25vw), 1.25rem); /* 18-20 500-1300 */
+        --font-tiny: clamp(0.625rem, calc(0.547rem + 0.25vw), 0.75rem); /* 10-12 500-1300 */ 
+        --font-small: clamp(0.75rem, calc(0.672rem + 0.25vw), 0.875rem); /* 14-16 500-1300 */
+        --font-medium: clamp(0.875rem, calc(0.797rem + 0.25vw), 1rem); /* 16-18 500-1300 */
+        --font-large: clamp(1rem, calc(0.922rem + 0.25vw), 1.125rem); /* 18-20 500-1300 */
       }
       body {
         color: var(--text-color);
@@ -375,7 +375,7 @@
       transform: translateX(-50%);
       background: #333;
       color: #fff;
-      font-size: 12px;
+      font-size: var(--font-tiny);
       padding: 4px 6px;
       border-radius: 4px;
       white-space: nowrap;
@@ -446,7 +446,7 @@
         left: 0.25rem;
         padding: 3px;
         background-color: oklch(from var(--white) l c h / 0.75);
-        font-size: 0.75rem;
+        font-size: var(--font-tiny);
         position: absolute;
         font-weight: 500;
         color: oklch(from var(--black) l c h / 0.9);
@@ -534,7 +534,7 @@
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4 text-neutral-100"><path fill-rule="evenodd" d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-3.97 3.97a.75.75 0 1 1-1.06-1.06l3.97-3.97h-2.69a.75.75 0 0 1-.75-.75Zm-12 0A.75.75 0 0 1 3.75 3h4.5a.75.75 0 0 1 0 1.5H5.56l3.97 3.97a.75.75 0 0 1-1.06 1.06L4.5 5.56v2.69a.75.75 0 0 1-1.5 0v-4.5Zm11.47 11.78a.75.75 0 1 1 1.06-1.06l3.97 3.97v-2.69a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1 0-1.5h2.69l-3.97-3.97Zm-4.94-1.06a.75.75 0 0 1 0 1.06L5.56 19.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path></svg>
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4 text-neutral-100"><path fill-rule="evenodd" d="M3.22 3.22a.75.75 0 0 1 1.06 0l3.97 3.97V4.5a.75.75 0 0 1 1.5 0V9a.75.75 0 0 1-.75.75H4.5a.75.75 0 0 1 0-1.5h2.69L3.22 4.28a.75.75 0 0 1 0-1.06Zm17.56 0a.75.75 0 0 1 0 1.06l-3.97 3.97h2.69a.75.75 0 0 1 0 1.5H15a.75.75 0 0 1-.75-.75V4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0ZM3.75 15a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-2.69l-3.97 3.97a.75.75 0 0 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1-.75-.75Zm10.5 0a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-2.69l3.97 3.97a.75.75 0 1 1-1.06 1.06l-3.97-3.97v2.69a.75.75 0 0 1-1.5 0V15Z" clip-rule="evenodd"></path></svg>
         </button>
-        <button class="btn btn__mail" data-tip="hieucuopbien123@gmail.com">
+        <button class="btn btn__mail" data-tip="https://github.com/hieucuopbien123/LofiChill">
           <svg width="24" height="24" viewBox="0 0 20 20"><path fill="#ececec" d="M3.87 4h13.25C18.37 4 19 4.59 19 5.79v8.42c0 1.19-.63 1.79-1.88 1.79H3.87c-1.25 0-1.88-.6-1.88-1.79V5.79c0-1.2.63-1.79 1.88-1.79m6.62 8.6l6.74-5.53c.24-.2.43-.66.13-1.07c-.29-.41-.82-.42-1.17-.17l-5.7 3.86L4.8 5.83c-.35-.25-.88-.24-1.17.17c-.3.41-.11.87.13 1.07z"/></svg>
         </button>
       </div>
@@ -746,7 +746,6 @@
         pageError.style.display = "block";
       });
       mainBg.addEventListener("loadstart", () => {
-        console.log(preloadedBgSet);
         if(preloadedBgSet.has(backgroundName[currentBgIndex])) return;
         videoLoading.style.display = "inline-block";
       });
@@ -904,7 +903,7 @@
       triggerPlayMusic();
     });
     function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return 
     }
     async function triggerNextSong (isEndedSong = true){
       let audioList = currentMusicType === "lofi" ? listLofi : listChillstep;
@@ -914,7 +913,7 @@
       songTime.textContent = "00:00 / 00:00";
       bgAudio.src = `./assets/audio/${currentMusicType}/${currentSong}.mp3`;
       if(isEndedSong) {
-        await sleep(1000);
+        await new Promise(resolve => setTimeout(resolve, 1000));
         if(musicTrigger.checked) bgAudio.play();
       }
       else {
